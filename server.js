@@ -32,4 +32,40 @@ app.listen(3001, () => {
   res.json({
     idea: `${name} için öneri: ${idea}`
   });
+});const PORT = process.env.PORT || 3001;
+
+app.listen(PORT, () => {
+  console.log("Server çalışıyor");
+});const path = require("path");
+
+// ANA SAYFA
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "test.html"));
+});const express = require("express");
+const app = express();
+
+app.use(express.json());const express = require("express");
+const app = express();
+const path = require("path");
+
+app.use(express.json());
+
+// ANA SAYFA (HTML'i gösterir)
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "test.html"));
+});
+
+// API
+app.post("/idea", (req, res) => {
+  const { name, trait, interest } = req.body;
+
+  res.json({
+    idea: `${name} için ${interest} alanında ${trait} kişiliğine uygun bir iş fikri: dijital ürün veya online hizmet oluşturabilirsin 🚀`
+  });
+});
+
+// PORT (Render için zorunlu)
+const PORT = process.env.PORT;
+app.listen(PORT, () => {
+  console.log("Server çalışıyor");
 });
