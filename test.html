@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test</title>
+</head>
+<body>
+
+<button onclick="test()">Test Et</button>
+
+<script>
+function test() {
+  alert("1 - buton çalıştı");
+
+  fetch("http://localhost:3001/test", {
+    method: "POST"
+  })
+  .then(res => res.json())
+  .then(data => alert("2 - " + data.message))
+  .catch(err => alert("HATA: " + err));
+}
+</script>
+
+</body>
+</html>
