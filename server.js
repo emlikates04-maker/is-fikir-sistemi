@@ -68,4 +68,4 @@ app.post("/idea", (req, res) => {
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log("Server çalışıyor");
-});
+});const path = require("path");
