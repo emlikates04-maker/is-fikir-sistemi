@@ -65,7 +65,8 @@ app.post("/idea", (req, res) => {
 });
 
 // PORT (Render için zorunlu)
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server çalışıyor");
 });const path = require("path");
+     const PORT = process.env.PORT || 3000;                                                                                           
