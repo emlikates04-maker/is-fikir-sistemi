@@ -121,4 +121,11 @@ const server = http.createServer((req, res) => {
   res.end("OK 🚀");
 });
 
-server.listen(process.env.PORT || 3000);
+server.liconst express = require("express");
+const app = express();
+
+app.get("/", (req, res) => {
+  res.send("OK 🚀");
+});
+
+app.listen(process.env.PORT || 3000);sten(process.env.PORT || 3000);
