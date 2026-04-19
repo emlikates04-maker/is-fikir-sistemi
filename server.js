@@ -88,3 +88,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log("Server çalışıyor");
 });
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Server çalışıyor 🚀");
+});
+
+app.post("/idea", (req, res) => {
+  res.json({ idea: "Çalışıyor" });
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server çalışıyor");
+});
