@@ -1,12 +1,17 @@
+const express = require("express");
+const path = require("path");
 
-console.log("START");
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-const http = require("http");
+// public klasörünü kullan
+app.use(express.static(path.join(__dirname, "public")));
 
-const server = http.createServer((req, res) => {
-  res.end("OK 🚀");
+// ana sayfa
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-server.listen(process.env.PORT || 3000, () => {
-  console.log("RUNNING");
+app.listen(PORT, () => {
+  console.log("Server çalışıyor: " + PORT);
 });
