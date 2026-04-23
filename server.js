@@ -3,10 +3,10 @@ const path = require("path");
 
 const app = express();
 
-S
+// STATIC
 app.use(express.static(path.join(__dirname, "public")));
 
-
+// ANA SAYFA
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
