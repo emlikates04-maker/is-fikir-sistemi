@@ -3,155 +3,44 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Benim Projem</title>
-
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #0f172a;
-      color: white;
-      line-height: 1.6;
-    }
-
-    /* NAVBAR */
-    .nav {
-      display: flex;
-      justify-content: space-between;
-      padding: 20px 10%;
-      background: #111827;
-    }
-
-    .logo {
-      font-weight: bold;
-      font-size: 20px;
-    }
-
-    .nav a {
-      color: white;
-      text-decoration: none;
-      margin-left: 20px;
-    }
-
-    /* HERO */
-    .hero {
-      text-align: center;
-      padding: 100px 10%;
-    }
-
-    .hero h1 {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    .hero p {
-      font-size: 18px;
-      color: #cbd5e1;
-      margin-bottom: 30px;
-    }
-
-    .btn {
-      padding: 12px 25px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .btn:hover {
-      background: #2563eb;
-    }
-
-    /* FEATURES */
-    .features {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      padding: 60px 10%;
-      flex-wrap: wrap;
-    }
-
-    .card {
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-      width: 250px;
-      text-align: center;
-    }
-
-    /* FOOTER */
-    .footer {
-      text-align: center;
-      padding: 30px;
-      background: #111827;
-      margin-top: 50px;
-      color: #94a3b8;
-    }
-
-  </style>
+  <title>IdeaForge - Fikir Geliştirici</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
 
   <!-- NAV -->
-  <div class="nav">
-    <div class="logo">DGS Project</div>
-    <div>
-      <a href="#">Home</a>
-      <a href="#">Özellikler</a>
-      <a href="#">İletişim</a>
-    </div>
-  </div>
+  <header class="nav">
+    <div class="logo">IdeaForge</div>
+    <button class="btn-small">Get Started</button>
+  </header>
 
   <!-- HERO -->
   <section class="hero">
-    <h1>Fikirlerini Gerçeğe Dönüştür</h1>
-    <p>Modern, hızlı ve deploy edilebilir web projeleri oluştur.</p>
-    <button class="btn" onclick="alert('Başlıyoruz 🚀')">Başla</button>
+    <h1>Fikrini al, <span>gerçek ürüne dönüştür</span></h1>
+    <p>Basit fikirleri güçlü startup konseptlerine çevir.</p>
+
+    <div class="card">
+      <input id="ideaInput" placeholder="Örn: mobil uygulama fikrim var..." />
+      <button onclick="generateIdeas()">Fikri Geliştir</button>
+
+      <div id="output"></div>
+    </div>
   </section>
 
   <!-- FEATURES -->
   <section class="features">
-    <div class="card">
-      <h3>Hızlı</h3>
-      <p>Node.js ile hızlı backend yapısı</p>
+    <div class="feature">
+      ⚡ Hızlı analiz
     </div>
-
-    <div class="card">
-      <h3>Basit</h3>
-      <p>Temiz ve anlaşılır yapı</p>
+    <div class="feature">
+      💡 Startup önerileri
     </div>
-
-    <div class="card">
-      <h3>Deploy</h3>
-      <p>Render ile tek tık deploy</p>
+    <div class="feature">
+      🎯 MVP fikirleri
     </div>
   </section>
 
-  <!-- FOOTER -->
-  <div class="footer">
-    © 2026 DGS Project - Tüm hakları saklıdır
-  </div>
-
+  <script src="app.js"></script>
 </body>
 </html>
-<div style="max-width:600px;margin:auto;padding:20px;">
-  <h2>Fikir Geliştirici</h2>
-
-  <input id="ideaInput" placeholder="Fikrini yaz..." style="width:100%;padding:10px;" />
-
-  <button onclick="generateIdeas()" style="margin-top:10px;padding:10px;">
-    Fikri Geliştir
-  </button>
-
-  <div id="output" style="margin-top:20px;"></div>
-</div>
-
-<script src="app.js"></script>
