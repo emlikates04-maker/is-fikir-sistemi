@@ -1,20 +1,20 @@
-alert("JS çalışıyor");
-function generateIdeas() {
+async function generateIdeas() {
   const input = document.getElementById("ideaInput").value;
   const output = document.getElementById("output");
 
   if (!input) return;
 
-  if (input.toLowerCase().includes("yazılım müh")) {
-    output.innerHTML = "Ne yazık ki bitti kardeşim 💀";
-    return;
-  }
+  output.innerHTML = "🤖 AI düşünüyor...";
 
-  const ideas = [
-    "MVP oluştur",
-    "Hedef kitleyi daralt",
-    "Para kazanma modeli ekle"
-  ];
+  const res = await fetch("/generate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ idea: input })
+  });
 
-  output.innerHTML = ideas.map(i => `<p>${i}</p>`).join("");
+  const data = await res.json();
+
+  output.innerHTML = `<pre>${data.result}</pre>`;
 }
