@@ -1,43 +1,23 @@
 const express = require("express");
-const OpenAI = require("openai");
 
 const app = express();
 
+// JSON ve static dosya desteği
 app.use(express.json());
 app.use(express.static("public"));
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+/*
+  BASİT MVP SERVER
+  - OpenAI yok
+  - Sadece frontend (app.js) çalışır
+  - Render'da sorunsuz deploy olur
+*/
+
+app.get("/", (req, res) => {
+  res.sendFile(__dirname + "/public/index.html");
 });
 
-app.post("/generate", async (req, res) => {
-  try {
-    const { idea } = req.body;
-
-    const response = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "system",
-          content: "Sen bir fikir geliştirme uzmanısın."
-        },
-        {
-          role: "user",
-          content: idea
-        }
-      ]
-    });
-
-    res.json({
-      result: response.choices[0].message.content
-    });
-
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "AI error" });
-  }
-});
-
-app.listen(3000, () => {
-  console.log("Server running");
+// server başlat
+app.listen(process.env.PORT || 3000, () => {
+  console.log("Server running...");
 });
