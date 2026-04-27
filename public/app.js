@@ -1,23 +1,20 @@
+alert("JS çalışıyor");
 function generateIdeas() {
   const input = document.getElementById("ideaInput").value;
   const output = document.getElementById("output");
 
-  if (!input) {
-    output.innerHTML = "Bir fikir yaz.";
+  if (!input) return;
+
+  if (input.toLowerCase().includes("yazılım müh")) {
+    output.innerHTML = "Ne yazık ki bitti kardeşim 💀";
     return;
   }
 
   const ideas = [
-    "🎯 Hedef kitleni daralt: " + input,
-    "⚡ MVP versiyonunu 1 haftada çıkarabilirsin",
-    "💰 Para kazanma modeli eklemelisin",
-    "📊 Rakip analizi yap",
-    "🚀 Küçük bir test landing page oluştur"
+    "MVP oluştur",
+    "Hedef kitleyi daralt",
+    "Para kazanma modeli ekle"
   ];
 
   output.innerHTML = ideas.map(i => `<p>${i}</p>`).join("");
-}
-if (input.toLowerCase().includes("yazılım müh")) {
-  output.innerHTML = "Ne yazık ki bitti kardeşim 💀";
-  return;
 }
