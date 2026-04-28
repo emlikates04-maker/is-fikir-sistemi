@@ -18,3 +18,8 @@ async function generateIdeas() {
 
   output.innerHTML = `<pre>${data.result}</pre>`;
 }
+fetch("/api/generate-idea", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ idea: "fitness app" })
+})
