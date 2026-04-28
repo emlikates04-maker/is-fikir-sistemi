@@ -1,65 +1,55 @@
 const express = require("express");
 const app = express();
+const OpenAI = require("openai");
 
-// Middleware
 app.use(express.json());
 app.use(express.static("public"));
 
-// =======================
-// IDEA GENERATOR API
-// =======================
-app.post("/api/generate-idea", (req, res) => {
-  const idea = req.body.idea?.toLowerCase() || "";
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
 
-  let response = {
-    improvement: "",
-    risks: [],
-    monetization: [],
-    mvp: ""
-  };
+app.post("/api/generate-idea", async (req, res) => {
+  try {
+    const idea = req.body.idea;
 
-  // Simple intelligence rules (MVP logic)
-  if (idea.includes("fitness")) {
-    response = {
-      improvement: "Niche seç: evde spor yapanlara veya yeni başlayanlara odaklan.",
-      risks: ["yüksek rekabet", "kullanıcı tutma zor"],
-      monetization: ["subscription modeli", "premium workout plan"],
-      mvp: "Günde 5 egzersiz öneren basit mobil/web app"
-    };
-  } 
-  else if (idea.includes("app")) {
-    response = {
-      improvement: "Fikri daralt: tek bir problemi çözmeye odaklan.",
-      risks: ["user acquisition maliyeti", "rekabet"],
-      monetization: ["freemium model", "premium özellikler"],
-      mvp: "Tek özellikli minimal uygulama"
-    };
-  } 
-  else if (idea.includes("saas")) {
-    response = {
-      improvement: "B2B odaklı düşün: işletmelere değer üret.",
-      risks: ["satış süreci uzun", "müşteri bulma zor"],
-      monetization: ["aylık abonelik", "tiered pricing"],
-      mvp: "Tek bir otomasyon yapan web panel"
-    };
-  } 
-  else {
-    response = {
-      improvement: "Fikri daha spesifik hale getir ve hedef kitle belirle.",
-      risks: ["pazar belirsizliği", "ürün-fit riski"],
-      monetization: ["belirsiz - önce MVP test edilmeli"],
-      mvp: "Basit landing page + fikir doğrulama formu"
-    };
+    const response = await client.responses.create({
+      model: "gpt-4.1-mini",
+      input: `
+You are a startup advisor.
+
+User idea: ${idea}
+
+Return JSON only:
+{
+  "improvement": "string",
+  "risks": ["string"],
+  "monetization": ["string"],
+  "mvp": "string"
+}
+`
+    });
+
+    let text = response.output_text;
+
+    // güvenli parse (crash önler)
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}") + 1;
+
+    const clean = text.slice(jsonStart, jsonEnd);
+
+    res.json(JSON.parse(clean));
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      improvement: "Error",
+      risks: [],
+      monetization: [],
+      mvp: "Fix required"
+    });
   }
-
-  res.json(response);
 });
 
-// =======================
-// SERVER START
-// =======================
 const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log("Server running"));
