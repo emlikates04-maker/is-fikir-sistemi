@@ -22,3 +22,19 @@ async function generateIdea() {
     document.getElementById("improvement").innerText = "Hata oluştu";
   }
 }
+async function generateIdea() {
+  const idea = document.getElementById("idea").value;
+
+  const res = await fetch("/api/generate-idea", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ idea }),
+  });
+
+  const data = await res.json();
+
+  document.getElementById("result").innerText =
+    data.suggestion || data.error;
+}
