@@ -1,40 +1,32 @@
 async function generateIdea() {
-  const input = document.getElementById("ideaInput").value;
+  const idea = document.getElementById("idea").value;
 
-  document.getElementById("improvement").innerText = "AI düşünüyor...";
+  if (!idea) {
+    document.getElementById("result").innerText = "Lütfen bir fikir yaz";
+    return;
+  }
+
+  document.getElementById("result").innerText = "AI düşünüyor...";
 
   try {
     const res = await fetch("/api/generate-idea", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ idea: input })
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ idea }),
     });
 
     const data = await res.json();
 
-    document.getElementById("improvement").innerText = data.improvement;
-    document.getElementById("risks").innerText = data.risks.join(", ");
-    document.getElementById("monetization").innerText = data.monetization.join(", ");
-    document.getElementById("mvp").innerText = data.mvp;
-
+    if (data.suggestion) {
+      document.getElementById("result").innerText = data.suggestion;
+    } else {
+      document.getElementById("result").innerText =
+        data.error || "Bir hata oluştu";
+    }
   } catch (err) {
-    console.log(err);
-    document.getElementById("improvement").innerText = "Hata oluştu";
+    document.getElementById("result").innerText =
+      "Bağlantı hatası: " + err.message;
   }
-}
-async function generateIdea() {
-  const idea = document.getElementById("idea").value;
-
-  const res = await fetch("/api/generate-idea", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ idea }),
-  });
-
-  const data = await res.json();
-
-  document.getElementById("result").innerText =
-    data.suggestion || data.error;
 }

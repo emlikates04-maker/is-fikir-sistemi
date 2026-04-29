@@ -1,57 +1,81 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>IdeaForge - Fikir Geliştirici</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>SaaS Idea Generator</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+      background: #1e293b;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+    }
+
+    button {
+      margin-top: 15px;
+      width: 100%;
+      padding: 12px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    pre {
+      margin-top: 20px;
+      background: #0b1220;
+      padding: 15px;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      text-align: left;
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- NAV -->
-  <header class="nav">
-    <div class="logo">IdeaForge</div>
-    <button class="btn-small">Get Started</button>
-  </header>
+  <div class="container">
+    <h1>🚀 SaaS Idea Generator</h1>
+    <p>Enter your idea and get AI feedback</p>
 
-  <!-- HERO -->
-  <section class="hero">
-    <h1>Fikrini al, <span>gerçek ürüne dönüştür</span></h1>
-    <p>Basit fikirleri güçlü startup konseptlerine çevir.</p>
+    <input id="idea" placeholder="e.g. fitness app for students" />
 
-    <div class="card">
-      <input id="ideaInput" placeholder="Örn: mobil uygulama fikrim var..." />
-      <button onclick="generateIdeas()">Fikri Geliştir</button>
+    <button onclick="generateIdea()">Generate Idea</button>
 
-      <div id="output"></div>
-    </div>
-  </section>
-
-  <!-- FEATURES -->
-  <section class="features">
-    <div class="feature">
-      ⚡ Hızlı analiz
-    </div>
-    <div class="feature">
-      💡 Startup önerileri
-    </div>
-    <div class="feature">
-      🎯 MVP fikirleri
-    </div>
-  </section>
+    <pre id="result">Result will appear here...</pre>
+  </div>
 
   <script src="app.js"></script>
+
 </body>
 </html>
-<button onclick="generateIdeas()"></button>
-<input id="ideaInput" placeholder="Fikrini yaz..." />
-
-<button onclick="generateIdea()">Generate</button>
-<div id="improvement"></div>
-<div id="risks"></div>
-<div id="monetization"></div>
-<div id="mvp"></div>
-<input id="idea" />
-<button onclick="generateIdea()">Generate</button>
-<pre id="result"></pre>
