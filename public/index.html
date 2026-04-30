@@ -1,81 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>SaaS Idea Generator</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 500px;
-      background: #1e293b;
-      padding: 30px;
-      border-radius: 12px;
-      text-align: center;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 15px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-    }
-
-    button {
-      margin-top: 15px;
-      width: 100%;
-      padding: 12px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    button:hover {
-      background: #2563eb;
-    }
-
-    pre {
-      margin-top: 20px;
-      background: #0b1220;
-      padding: 15px;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      text-align: left;
-    }
-  </style>
 </head>
-
 <body>
 
-  <div class="container">
-    <h1>🚀 SaaS Idea Generator</h1>
-    <p>Enter your idea and get AI feedback</p>
+  <h1>AI SaaS Idea Generator 🚀</h1>
 
-    <input id="idea" placeholder="e.g. fitness app for students" />
+  <input id="prompt" placeholder="Fikir yaz..." />
+  <button onclick="generateIdea()">Generate</button>
 
-    <button onclick="generateIdea()">Generate Idea</button>
-
-    <pre id="result">Result will appear here...</pre>
-  </div>
+  <p id="result"></p>
 
   <script src="app.js"></script>
-
 </body>
 </html>
