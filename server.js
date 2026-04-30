@@ -67,3 +67,11 @@ app.post("/api/generate-idea", async (req, res) => {
 app.listen(PORT, () => {
   console.log("RUNNING ON", PORT);
 });
+app.get("/debug-env", (req, res) => {
+  res.json({
+    keyExists: !!process.env.OPENAI_API_KEY,
+    keyPreview: process.env.OPENAI_API_KEY
+      ? process.env.OPENAI_API_KEY.slice(0, 8) + "..."
+      : null
+  });
+});
