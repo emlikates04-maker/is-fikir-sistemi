@@ -23,6 +23,12 @@ app.get("/", (req, res) => {
 // AI ENDPOINT
 app.post("/api/generate-idea", async (req, res) => {
   try {
+    const OpenAI = (await import("openai")).default;
+
+    const client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY
+    });
+
     const { prompt } = req.body;
 
     if (!prompt) {
@@ -32,16 +38,9 @@ app.post("/api/generate-idea", async (req, res) => {
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: "You are a startup idea generator. Give short, practical SaaS ideas."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.9
+        { role: "system", content: "You are a SaaS idea generator." },
+        { role: "user", content: prompt }
+      ]
     });
 
     res.json({
@@ -49,14 +48,7 @@ app.post("/api/generate-idea", async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      error: "AI request failed",
-      details: err.message
-    });
+    console.log(err);
+    res.status(500).json({ error: "AI failed", details: err.message });
   }
-});
-
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
 });
