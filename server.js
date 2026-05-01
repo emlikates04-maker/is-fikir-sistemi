@@ -1,77 +1,73 @@
 import express from "express";
 import dotenv from "dotenv";
+import OpenAI from "openai";
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-// JSON body support
+// JSON middleware (çok kritik)
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// TEST ROUTE
+// OpenAI client (crash önleyici güvenli kurulum)
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+// HEALTH CHECK
 app.get("/", (req, res) => {
   res.send("SERVER OK");
 });
 
-// AI ROUTE (SAFE)
+// AI ENDPOINT
 app.post("/api/generate-idea", async (req, res) => {
   try {
-    const { prompt } = req.body;
+    const prompt = req.body?.prompt;
 
     if (!prompt) {
-      return res.status(400).json({ error: "Prompt gerekli" });
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({
-        error: "OPENAI_API_KEY missing in Render env"
+      return res.status(400).json({
+        error: "Prompt gerekli"
       });
     }
 
-    const OpenAI = (await import("openai")).default;
-
-    const client = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-
+    // OpenAI request
     const response = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "You are a SaaS idea generator. Give short, practical startup ideas."
+          content: "You are a SaaS idea generator. Give creative, practical startup ideas."
         },
         {
           role: "user",
           content: prompt
         }
-      ]
+      ],
+      temperature: 0.9,
     });
 
-    res.json({
-      idea: response.choices[0].message.content
+    const idea = response.choices?.[0]?.message?.content;
+
+    return res.json({
+      success: true,
+      idea: idea || "No idea generated"
     });
 
-  } catch (err) {
-    console.log("AI ERROR:", err);
+  } catch (error) {
+    console.error("OPENAI ERROR:", error);
 
-    res.status(500).json({
+    return res.status(500).json({
+      success: false,
       error: "AI request failed",
-      details: err.message
+      details: error.message
     });
   }
 });
 
-// START SERVER
+// PORT (Render uyumlu)
+const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, () => {
-  console.log("RUNNING ON", PORT);
-});
-app.get("/debug-env", (req, res) => {
-  res.json({
-    keyExists: !!process.env.OPENAI_API_KEY,
-    keyPreview: process.env.OPENAI_API_KEY
-      ? process.env.OPENAI_API_KEY.slice(0, 8) + "..."
-      : null
-  });
+  console.log("SERVER OK");
 });
