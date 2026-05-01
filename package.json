@@ -15,3 +15,14 @@
 {
   "prompt": "saas fikir üret"
 }
+"engines": {
+  "node": "20.x"
+}
+{
+  "name": "your-app",
+  "version": "1.0.0",
+  "engines": {
+    "node": "18.x"
+  },
+  ...
+}
