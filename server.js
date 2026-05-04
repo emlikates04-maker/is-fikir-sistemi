@@ -1,62 +1,72 @@
 import express from "express";
-import dotenv from "dotenv";
 import OpenAI from "openai";
 
-dotenv.config();
-
 const app = express();
-app.use(express.json());
+const PORT = process.env.PORT || 3000;
 
-let client = null;
-
-// OPENAI SAFE INIT (CRASH ENGELLER)
-if (process.env.OPENAI_API_KEY) {
-  client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-} else {
-  console.warn("OPENAI_API_KEY missing!");
-}
-
-app.get("/", (req, res) => {
-  res.send("SERVER OK");
+// 🔥 CRASH ENGELLEME
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT ERROR:", err);
 });
 
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED PROMISE:", err);
+});
+
+app.use(express.json());
+app.use(express.static("public"));
+
+// 🔥 API KEY KONTROL (CRASH YOK)
+let openai = null;
+
+if (process.env.OPENAI_API_KEY) {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+  console.log("✅ OpenAI aktif");
+} else {
+  console.log("⚠️ OPENAI_API_KEY yok → AI devre dışı");
+}
+
+// 🔥 ENDPOINT
 app.post("/api/generate-idea", async (req, res) => {
   try {
-    if (!client) {
-      return res.status(500).json({
-        error: "OPENAI_API_KEY not set on server",
+    const { idea } = req.body;
+
+    // 🔥 AI yoksa fallback (CRASH ENGEL)
+    if (!openai) {
+      return res.json({
+        result: `Mock fikir: "${idea}" için bir SaaS aracı oluştur.`,
       });
     }
 
-    const prompt = req.body?.prompt;
-
-    if (!prompt) {
-      return res.status(400).json({ error: "Prompt missing" });
-    }
-
-    const response = await client.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.9,
+      messages: [
+        {
+          role: "system",
+          content: "You are a SaaS startup expert.",
+        },
+        {
+          role: "user",
+          content: `Give me a SaaS idea based on this: ${idea}`,
+        },
+      ],
     });
 
     res.json({
-      idea: response.choices[0].message.content,
+      result: completion.choices[0].message.content,
     });
-
   } catch (err) {
-    console.error(err);
+    console.error("API ERROR:", err);
+
+    // 🔥 CRASH YERİNE RESPONSE
     res.status(500).json({
-      error: "OpenAI request failed",
-      details: err.message,
+      result: "AI hata verdi ama sistem ayakta.",
     });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-
 app.listen(PORT, () => {
-  console.log("SERVER OK");
+  console.log(`🚀 Server running on port ${PORT}`);
 });
