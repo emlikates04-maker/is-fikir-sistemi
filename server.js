@@ -70,3 +70,4 @@ Kurallar:
 });
 
 app.listen(3000);
+console.log("API KEY VAR MI:", !!process.env.OPENAI_API_KEY);
