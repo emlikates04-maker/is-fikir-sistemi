@@ -1,82 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>AI SaaS Idea Generator</title>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #0f172a;
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-
-    .container {
-      width: 400px;
-      background: #1e293b;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    }
-
-    h1 {
-      font-size: 20px;
-      margin-bottom: 15px;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      margin-bottom: 10px;
-      outline: none;
-    }
-
-    button {
-      width: 100%;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #3b82f6;
-      color: white;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #2563eb;
-    }
-
-    #output {
-      margin-top: 15px;
-      padding: 10px;
-      background: #0f172a;
-      border-radius: 8px;
-      min-height: 50px;
-      white-space: pre-wrap;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
   <div class="container">
-    <h1>AI SaaS Idea Generator</h1>
+    <h1>🚀 AI SaaS Idea Generator</h1>
 
-    <input id="ideaInput" placeholder="Fikir yaz..." />
+    <input id="prompt" placeholder="Fikir yaz... (örn: mobil oyun)" />
 
-    <button onclick="generateIdea()">Generate</button>
+    <button onclick="generateIdea()">Oluştur</button>
 
-    <div id="output"></div>
+    <div id="loading" class="hidden">Thinking...</div>
+
+    <div id="result"></div>
   </div>
 
   <script src="app.js"></script>
-
 </body>
 </html>

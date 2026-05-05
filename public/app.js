@@ -1,8 +1,10 @@
 async function generateIdea() {
-  const input = document.getElementById("ideaInput").value;
-  const output = document.getElementById("output");
+  const prompt = document.getElementById("prompt").value;
+  const result = document.getElementById("result");
+  const loading = document.getElementById("loading");
 
-  output.innerHTML = "AI düşünüyor...";
+  result.innerHTML = "";
+  loading.classList.remove("hidden");
 
   try {
     const res = await fetch("/api/generate-idea", {
@@ -10,28 +12,20 @@ async function generateIdea() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ idea: input })
+      body: JSON.stringify({ prompt })
     });
 
     const data = await res.json();
 
-    console.log("RAW RESPONSE:", data);
+    loading.classList.add("hidden");
 
-    // 🔥 HER DURUMA DAYANIKLI OKUMA
-    const result =
-      data.result ||
-      data.message ||
-      data.data ||
-      JSON.stringify(data);
-
-    output.innerHTML = `
-      <div style="padding:10px;border:1px solid #ddd;margin-top:10px;">
-        ${result}
-      </div>
+    result.innerHTML = `
+      <h3>💡 Fikir:</h3>
+      <p>${data.idea}</p>
+      <small>mode: ${data.mode}</small>
     `;
-
   } catch (err) {
-    console.log(err);
-    output.innerHTML = "Hata oluştu ama sistem çalışıyor";
+    loading.classList.add("hidden");
+    result.innerHTML = "Hata oluştu";
   }
 }
