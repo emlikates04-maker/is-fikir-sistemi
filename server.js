@@ -12,19 +12,18 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.static("public"));
 
-/* 🔐 OpenAI güvenli init */
 const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
-/* 🚀 AI IDEA ENDPOINT */
+/* 🧠 AI IDEA GENERATION */
 app.post("/api/generate-idea", async (req, res) => {
   try {
     const prompt = req.body.prompt;
 
     if (!prompt) {
       return res.status(400).json({
-        idea: "Lütfen bir fikir yaz.",
+        idea: "Lütfen bir konu gir.",
         mode: "error",
       });
     }
@@ -36,8 +35,15 @@ app.post("/api/generate-idea", async (req, res) => {
         messages: [
           {
             role: "system",
-            content:
-              "Sen bir SaaS fikir üreticisisin. Girişimci odaklı, kısa ve net fikirler üret.",
+            content: `
+Sen bir YC seviyesinde SaaS fikir üreticisisin.
+
+Kurallar:
+- Çok kısa ve net yaz
+- Gereksiz açıklama yapma
+- Direkt iş fikri ver
+- Monetization önerisi ekle
+`,
           },
           {
             role: "user",
@@ -54,14 +60,14 @@ app.post("/api/generate-idea", async (req, res) => {
 
     /* 🧠 FALLBACK (AI YOKSA) */
     return res.json({
-      idea: `🔥 Mock fikir: "${prompt}" için abonelik tabanlı AI platform yapılabilir.`,
+      idea: `Bu fikir için SaaS oluşturulabilir: ${prompt} tabanlı AI platform.`,
       mode: "mock",
     });
   } catch (err) {
     console.error(err);
 
     return res.json({
-      idea: "Sistem şu an yoğun, tekrar dene.",
+      idea: "Sistem yoğun, tekrar dene.",
       mode: "error_fallback",
     });
   }

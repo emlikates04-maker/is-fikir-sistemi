@@ -3,6 +3,8 @@ async function generate() {
   const result = document.getElementById("result");
   const loading = document.getElementById("loading");
 
+  if (!prompt) return;
+
   result.innerHTML = "";
   loading.classList.remove("hidden");
 
@@ -18,15 +20,12 @@ async function generate() {
     loading.classList.add("hidden");
 
     result.innerHTML = `
-      <h3>💡 Fikir</h3>
+      <h3>💡 AI Fikir</h3>
       <p>${data.idea}</p>
       <small>mode: ${data.mode}</small>
     `;
 
-    // 🧠 HISTORY SAVE
     saveHistory(prompt, data.idea);
-
-    // UI update
     renderHistory();
 
   } catch (err) {
@@ -35,43 +34,40 @@ async function generate() {
   }
 }
 
-/* 🧠 SAVE TO LOCALSTORAGE */
+/* 🧠 HISTORY */
 function saveHistory(prompt, idea) {
   let history = JSON.parse(localStorage.getItem("history")) || [];
 
   history.unshift({
     prompt,
     idea,
-    time: new Date().toLocaleString(),
+    time: Date.now(),
   });
 
-  // max 20 kayıt
   history = history.slice(0, 20);
 
   localStorage.setItem("history", JSON.stringify(history));
 }
 
-/* 📌 RENDER HISTORY */
 function renderHistory() {
-  const historyDiv = document.getElementById("history");
   const history = JSON.parse(localStorage.getItem("history")) || [];
+  const el = document.getElementById("history");
 
-  historyDiv.innerHTML = history
+  el.innerHTML = history
     .map(
-      (item) => `
-      <div class="history-item" onclick="loadItem('${item.prompt}')">
-        <b>${item.prompt}</b><br/>
-        <small>${item.time}</small>
+      (h) => `
+      <div class="history-item" onclick="loadPrompt('${h.prompt}')">
+        <b>${h.prompt}</b>
+        <br/>
+        <small>${new Date(h.time).toLocaleString()}</small>
       </div>
     `
     )
     .join("");
 }
 
-/* 🔁 HISTORY ITEM CLICK */
-function loadItem(prompt) {
-  document.getElementById("prompt").value = prompt;
+function loadPrompt(p) {
+  document.getElementById("prompt").value = p;
 }
 
-/* 🚀 INIT */
 renderHistory();
