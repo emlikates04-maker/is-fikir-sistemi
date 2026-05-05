@@ -1,18 +1,17 @@
 {
-  "name": "ai-saas-mvp",
+  "name": "saas-idea-generator",
   "version": "1.0.0",
+  "description": "AI SaaS Idea Generator",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "express": "^4.18.2",
-    "openai": "^4.0.0"
+    "express": "^4.19.2",
+    "openai": "^4.56.0"
   }
-}
-"dependencies": {
-  "express": "^4.18.2",
-  "openai": "^4.0.0",
-  "stripe": "^14.0.0"
 }
