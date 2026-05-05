@@ -1,7 +1,7 @@
 import express from "express";
+import OpenAI from "openai";
 import path from "path";
 import { fileURLToPath } from "url";
-import OpenAI from "openai";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,33 +12,32 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.static("public"));
 
-// OpenAI SAFE INIT
-let openai = null;
+/* 🔐 OpenAI güvenli init */
+const openai = process.env.OPENAI_API_KEY
+  ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+  : null;
 
-if (process.env.OPENAI_API_KEY) {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-}
-
-// API ROUTE
+/* 🚀 AI IDEA ENDPOINT */
 app.post("/api/generate-idea", async (req, res) => {
   try {
     const prompt = req.body.prompt;
 
     if (!prompt) {
-      return res.status(400).json({ error: "Prompt boş olamaz" });
+      return res.status(400).json({
+        idea: "Lütfen bir fikir yaz.",
+        mode: "error",
+      });
     }
 
-    // 🔥 REAL AI MODE
+    /* 🤖 REAL AI */
     if (openai) {
-      const completion = await openai.chat.completions.create({
+      const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
             content:
-              "Sen bir SaaS fikir üreticisisin. Kısa, net ve girişim odaklı fikirler üret.",
+              "Sen bir SaaS fikir üreticisisin. Girişimci odaklı, kısa ve net fikirler üret.",
           },
           {
             role: "user",
@@ -48,26 +47,26 @@ app.post("/api/generate-idea", async (req, res) => {
       });
 
       return res.json({
-        idea: completion.choices[0].message.content,
+        idea: response.choices[0].message.content,
         mode: "ai",
       });
     }
 
-    // 🧠 FALLBACK MODE (AI YOKSA)
+    /* 🧠 FALLBACK (AI YOKSA) */
     return res.json({
-      idea: `🔥 Mock SaaS Fikri: "${prompt}" için abonelik tabanlı AI destekli platform oluşturulabilir.`,
+      idea: `🔥 Mock fikir: "${prompt}" için abonelik tabanlı AI platform yapılabilir.`,
       mode: "mock",
     });
-  } catch (error) {
-    console.error("API ERROR:", error);
+  } catch (err) {
+    console.error(err);
 
-    return res.status(500).json({
-      idea: "Sistem şu an yoğun. Lütfen tekrar dene.",
+    return res.json({
+      idea: "Sistem şu an yoğun, tekrar dene.",
       mode: "error_fallback",
     });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("AI SaaS running on", PORT);
 });
