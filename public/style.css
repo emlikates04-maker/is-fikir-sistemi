@@ -46,3 +46,22 @@ button:hover {
 .hidden {
   display: none;
 }
+#history {
+  margin-top: 10px;
+  text-align: left;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.history-item {
+  background: #111827;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background: #1f2937;
+}
