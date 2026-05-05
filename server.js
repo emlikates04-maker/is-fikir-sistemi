@@ -1,14 +1,7 @@
 import express from "express";
 import OpenAI from "openai";
-import path from "path";
-import { fileURLToPath } from "url";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
 app.use(express.json());
 app.use(express.static("public"));
 
@@ -16,63 +9,64 @@ const openai = process.env.OPENAI_API_KEY
   ? new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
   : null;
 
-/* 🧠 AI IDEA GENERATION */
-app.post("/api/generate-idea", async (req, res) => {
-  try {
-    const prompt = req.body.prompt;
+/* 🧠 SESSION MEMORY (MVP) */
+const sessions = {};
 
-    if (!prompt) {
-      return res.status(400).json({
-        idea: "Lütfen bir konu gir.",
-        mode: "error",
+/* 🚀 AI INTERVIEW */
+app.post("/api/chat", async (req, res) => {
+  try {
+    const { sessionId, message } = req.body;
+
+    if (!sessions[sessionId]) {
+      sessions[sessionId] = [];
+    }
+
+    sessions[sessionId].push({ role: "user", content: message });
+
+    if (!openai) {
+      return res.json({
+        reply: "AI yok, mock mode",
       });
     }
 
-    /* 🤖 REAL AI */
-    if (openai) {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `
-Sen bir YC seviyesinde SaaS fikir üreticisisin.
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: `
+Sen bir SaaS fikir discovery AI'sın.
+
+Görevin:
+- Kullanıcıdan bilgi toplamak
+- HER cevaptan sonra 1 DERİNLEŞTİRİCİ SORU SORMAK
+- Amaç: kullanıcıyı tanıyıp en iyi SaaS fikrini çıkarmak
 
 Kurallar:
-- Çok kısa ve net yaz
-- Gereksiz açıklama yapma
-- Direkt iş fikri ver
-- Monetization önerisi ekle
+- Asla direkt final fikir verme (ilk aşamalarda)
+- Sürekli soru sor
+- Kısa yaz
+- Tek soru sor
 `,
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      });
+        },
+        ...sessions[sessionId],
+      ],
+    });
 
-      return res.json({
-        idea: response.choices[0].message.content,
-        mode: "ai",
-      });
-    }
+    const aiMessage = response.choices[0].message.content;
 
-    /* 🧠 FALLBACK (AI YOKSA) */
-    return res.json({
-      idea: `Bu fikir için SaaS oluşturulabilir: ${prompt} tabanlı AI platform.`,
-      mode: "mock",
+    sessions[sessionId].push({
+      role: "assistant",
+      content: aiMessage,
+    });
+
+    res.json({
+      reply: aiMessage,
     });
   } catch (err) {
     console.error(err);
-
-    return res.json({
-      idea: "Sistem yoğun, tekrar dene.",
-      mode: "error_fallback",
-    });
+    res.json({ reply: "Hata oluştu" });
   }
 });
 
-app.listen(PORT, () => {
-  console.log("AI SaaS running on", PORT);
-});
+app.listen(3000);
