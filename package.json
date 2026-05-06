@@ -15,3 +15,10 @@
     "openai": "^4.56.0"
   }
 }
+{
+  "dependencies": {
+    "express": "...",
+    "cors": "...",
+    "node-fetch": "..."
+  }
+}
