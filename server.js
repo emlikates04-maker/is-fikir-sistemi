@@ -4,34 +4,42 @@ import fetch from "node-fetch";
 
 const app = express();
 
-// ================= MIDDLEWARE =================
 app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-// ================= AI SYSTEM PROMPT =================
-const SYSTEM_PROMPT = `
-You are an elite SaaS Idea Discovery AI.
+/**
+ * CHAT STATE RULE:
+ * we control flow ONLY by counting user messages
+ */
 
-MISSION:
-You interview users like a startup founder.
+function getSystemPrompt(step) {
+  if (step < 5) {
+    return `
+You are a SaaS Idea Interview AI.
 
-CORE RULE:
+GOAL:
+Ask ONLY ONE question per message.
 
-🔵 PHASE 1 (Discovery):
-If user messages < 5:
-- Ask ONLY ONE question per message
-- Never give ideas yet
-- Focus on:
-  skills
-  time availability
-  interests
-  income goal
-  experience
+DO NOT give ideas.
 
-🔵 PHASE 2 (Generation):
-If user messages >= 5:
-Generate SaaS idea ONLY in this format:
+FOCUS:
+- skills
+- time availability
+- interests
+- money goal
+- experience level
+
+Be short. One question only.
+`;
+  }
+
+  return `
+You are a SaaS Idea Generator AI.
+
+Now you have enough information.
+
+Generate a SaaS idea ONLY in this format:
 
 === SAAS IDEA ===
 === WHY THIS WORKS ===
@@ -43,34 +51,34 @@ Step 2:
 Step 3:
 === FIRST ACTION ===
 
-STYLE RULES:
-- Be extremely concise
-- No fluff
-- Think like YC founder
+Rules:
+- no questions anymore
+- no fluff
+- be sharp
 `;
+}
 
-// ================= CHAT ENDPOINT =================
 app.post("/api/chat", async (req, res) => {
   try {
     const { messages } = req.body;
 
     if (!messages || !Array.isArray(messages)) {
-      return res.json({ reply: "Invalid request format." });
+      return res.json({ reply: "Invalid request" });
     }
 
     const userMessages = messages.filter(m => m.role === "user");
-    const shouldFinalize = userMessages.length >= 5;
+    const step = userMessages.length;
 
-    // ================= FALLBACK MODE =================
+    // ===== FALLBACK MODE =====
     if (!process.env.OPENAI_API_KEY) {
       return res.json({
-        reply: shouldFinalize
-          ? mockFinal()
-          : mockQuestion(userMessages.length)
+        reply: step < 5
+          ? fallbackQuestions(step)
+          : fallbackFinal()
       });
     }
 
-    // ================= OPENAI CALL =================
+    // ===== OPENAI REQUEST =====
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -80,7 +88,7 @@ app.post("/api/chat", async (req, res) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: getSystemPrompt(step) },
           ...messages
         ],
         temperature: 0.7
@@ -90,7 +98,7 @@ app.post("/api/chat", async (req, res) => {
     const data = await response.json();
 
     if (!data.choices?.[0]) {
-      return res.json({ reply: "AI response error." });
+      return res.json({ reply: "AI error" });
     }
 
     res.json({
@@ -99,49 +107,52 @@ app.post("/api/chat", async (req, res) => {
 
   } catch (err) {
     console.error("SERVER ERROR:", err);
-    res.json({ reply: "Server error occurred." });
+    res.json({ reply: "Server error" });
   }
 });
 
-// ================= MOCK FLOW =================
-function mockQuestion(step) {
-  const questions = [
+/**
+ * FALLBACK QUESTIONS
+ */
+function fallbackQuestions(step) {
+  const q = [
     "Günde kaç saat bu işe ayırabilirsin?",
     "Kod biliyor musun yoksa no-code mu?",
     "Hedefin para mı yoksa uzun vadeli iş mi?",
-    "Hangi alana yakınsın? (AI, finance, e-commerce, content)",
-    "Daha önce bir proje yaptın mı?"
+    "Hangi alan ilgini çekiyor?",
+    "Daha önce proje yaptın mı?"
   ];
-
-  return questions[step] || "En güçlü motivasyonun ne?";
+  return q[step] || "Seni en çok ne motive ediyor?";
 }
 
-function mockFinal() {
+/**
+ * FALLBACK FINAL
+ */
+function fallbackFinal() {
   return `
 === SAAS IDEA ===
-AI destekli freelance iş eşleştirme platformu
+AI destekli mikro SaaS platformu
 
 === WHY THIS WORKS ===
-Yeni başlayanlar için büyük pazar
+Düşük maliyet + yüksek talep
 
 === TARGET USER ===
-Online para kazanmak isteyen bireyler
+Yeni başlayan girişimciler
 
 === MONETIZATION ===
-Aylık abonelik ($9-$29)
+Aylık abonelik
 
 === MVP PLAN ===
 Step 1: Landing page
-Step 2: AI matching system
+Step 2: AI engine
 Step 3: Dashboard
 
 === FIRST ACTION ===
-İlk 10 kullanıcıyı bul ve test et
+İlk 10 kullanıcıyı bul
 `;
 }
 
-// ================= START SERVER =================
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log("Server running on port " + PORT);
 });
