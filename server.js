@@ -8,38 +8,22 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static("public"));
 
-/**
- * CHAT STATE RULE:
- * we control flow ONLY by counting user messages
- */
+// ================= QUESTIONS ENGINE (AI YOK) =================
+const QUESTIONS = [
+  "Günde kaç saat bu işe ayırabilirsin?",
+  "Kod biliyor musun yoksa no-code mu?",
+  "Amacın hızlı para mı yoksa uzun vadeli mi?",
+  "Hangi alan ilgini çekiyor? (AI, finance, e-commerce, content)",
+  "Daha önce bir proje yaptın mı?"
+];
 
-function getSystemPrompt(step) {
-  if (step < 5) {
-    return `
-You are a SaaS Idea Interview AI.
+// ================= FINAL PROMPT =================
+const FINAL_PROMPT = `
+You are a SaaS Idea Generator.
 
-GOAL:
-Ask ONLY ONE question per message.
+Generate ONE high-quality SaaS idea.
 
-DO NOT give ideas.
-
-FOCUS:
-- skills
-- time availability
-- interests
-- money goal
-- experience level
-
-Be short. One question only.
-`;
-  }
-
-  return `
-You are a SaaS Idea Generator AI.
-
-Now you have enough information.
-
-Generate a SaaS idea ONLY in this format:
+FORMAT:
 
 === SAAS IDEA ===
 === WHY THIS WORKS ===
@@ -51,12 +35,9 @@ Step 2:
 Step 3:
 === FIRST ACTION ===
 
-Rules:
-- no questions anymore
-- no fluff
-- be sharp
+Be extremely concise.
+No fluff.
 `;
-}
 
 app.post("/api/chat", async (req, res) => {
   try {
@@ -69,16 +50,18 @@ app.post("/api/chat", async (req, res) => {
     const userMessages = messages.filter(m => m.role === "user");
     const step = userMessages.length;
 
-    // ===== FALLBACK MODE =====
-    if (!process.env.OPENAI_API_KEY) {
+    // ================= PHASE 1: WE CONTROL QUESTIONS =================
+    if (step < 5) {
       return res.json({
-        reply: step < 5
-          ? fallbackQuestions(step)
-          : fallbackFinal()
+        reply: QUESTIONS[step] || "Seni en çok ne motive ediyor?"
       });
     }
 
-    // ===== OPENAI REQUEST =====
+    // ================= PHASE 2: AI ONLY FINAL OUTPUT =================
+    if (!process.env.OPENAI_API_KEY) {
+      return res.json({ reply: mockFinal() });
+    }
+
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -88,7 +71,7 @@ app.post("/api/chat", async (req, res) => {
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
-          { role: "system", content: getSystemPrompt(step) },
+          { role: "system", content: FINAL_PROMPT },
           ...messages
         ],
         temperature: 0.7
@@ -97,50 +80,30 @@ app.post("/api/chat", async (req, res) => {
 
     const data = await response.json();
 
-    if (!data.choices?.[0]) {
-      return res.json({ reply: "AI error" });
-    }
-
     res.json({
-      reply: data.choices[0].message.content
+      reply: data.choices?.[0]?.message?.content || "AI error"
     });
 
   } catch (err) {
-    console.error("SERVER ERROR:", err);
+    console.error(err);
     res.json({ reply: "Server error" });
   }
 });
 
-/**
- * FALLBACK QUESTIONS
- */
-function fallbackQuestions(step) {
-  const q = [
-    "Günde kaç saat bu işe ayırabilirsin?",
-    "Kod biliyor musun yoksa no-code mu?",
-    "Hedefin para mı yoksa uzun vadeli iş mi?",
-    "Hangi alan ilgini çekiyor?",
-    "Daha önce proje yaptın mı?"
-  ];
-  return q[step] || "Seni en çok ne motive ediyor?";
-}
-
-/**
- * FALLBACK FINAL
- */
-function fallbackFinal() {
+// ================= MOCK FINAL =================
+function mockFinal() {
   return `
 === SAAS IDEA ===
-AI destekli mikro SaaS platformu
+AI micro SaaS generator
 
 === WHY THIS WORKS ===
-Düşük maliyet + yüksek talep
+High demand low competition
 
 === TARGET USER ===
-Yeni başlayan girişimciler
+Beginner entrepreneurs
 
 === MONETIZATION ===
-Aylık abonelik
+Subscription $9-$29
 
 === MVP PLAN ===
 Step 1: Landing page
@@ -148,11 +111,9 @@ Step 2: AI engine
 Step 3: Dashboard
 
 === FIRST ACTION ===
-İlk 10 kullanıcıyı bul
+Get first 10 users
 `;
 }
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+app.listen(PORT, () => console.log("Server running"));
