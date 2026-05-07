@@ -2,35 +2,35 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Idea Generator</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI SaaS Discovery</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
-
 <body>
 
   <div class="container">
 
-    <h1>🚀 AI Idea Generator</h1>
+    <div class="top">
+      <h1>AI SaaS Discovery</h1>
+      <p>AI senin için doğru SaaS fikrini bulsun.</p>
+    </div>
 
-    <!-- INPUT -->
-    <input id="prompt" placeholder="Ne yapmak istiyorsun?" />
+    <div id="chat"></div>
 
-    <!-- BUTTON -->
-    <button onclick="generate()">Oluştur</button>
+    <div class="inputBox">
+      <input
+        type="text"
+        id="input"
+        placeholder="Bir şey yaz..."
+      />
 
-    <!-- LOADING -->
-    <div id="loading" class="hidden">Thinking...</div>
-
-    <!-- RESULT -->
-    <div id="result"></div>
-
-    <!-- HISTORY -->
-    <h3>📌 History</h3>
-    <div id="history"></div>
+      <button id="send">
+        Gönder
+      </button>
+    </div>
 
   </div>
 
   <script src="app.js"></script>
-
 </body>
 </html>
