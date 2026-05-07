@@ -3,8 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
-
-const OpenAI = require("openai").default; // 🔥 KRİTİK FIX
+const OpenAI = require("openai").default;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,55 +12,58 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// OPENAI SAFE INIT
+// SAFE INIT
 let client = null;
 
-if (process.env.OPENAI_API_KEY) {
-  client = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
+try {
+  if (process.env.OPENAI_API_KEY) {
+    client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+} catch (e) {
+  console.log("OpenAI init failed, fallback mode");
 }
 
 const SYSTEM_PROMPT = `
-You are an AI SaaS discovery assistant.
+You are SaaS discovery AI.
 
 Rules:
-- Ask ONE question at a time
-- Do NOT give final SaaS idea early
-- Analyze user deeply
-- Be short and direct
+- Ask ONE question only
+- Never give final idea early
+- Be short
 - Think like startup founder
 `;
 
-function fallbackAI(history = []) {
+function fallback(history = []) {
   const len = history.length;
 
-  if (len < 2) return "Ne yaparak para kazanmayı düşünüyorsun?";
-  if (len < 4) return "Teknik seviyen nedir? (0-10)";
-  if (len < 6) return "Günde kaç saat ayırabilirsin?";
-  if (len < 8) return "Hangi problem seni sinirlendiriyor?";
+  if (len < 2) return "Hangi alanda daha çok vakit geçiriyorsun?";
+  if (len < 4) return "Bu alanda bir problem yaşadın mı?";
+  if (len < 6) return "Günde kaç saat çalışabilirsin?";
+  if (len < 8) return "Para kazanma hedefin nedir?";
 
   return `
 === SAAS IDEA ===
-Micro AI automation tool
+AI Micro SaaS Tool
 
 === WHY IT FITS USER ===
-You like problem solving
+Based on your interests and time capacity
 
 === TARGET USERS ===
-Solo founders
+Indie builders
 
 === MONETIZATION ===
 Subscription
 
 === MVP PLAN ===
-Simple AI chat + form
+Simple AI chat + tracking
 
 === TECH STACK ===
 Node.js + OpenAI + Render
 
 === FIRST ACTION ===
-Build MVP in 1 day
+Build landing page
 `;
 }
 
@@ -70,13 +72,13 @@ app.post("/api/chat", async (req, res) => {
     const { message, history = [] } = req.body;
 
     if (!message) {
-      return res.json({ reply: "Mesaj boş olamaz" });
+      return res.json({ reply: "Mesaj boş" });
     }
 
-    // 🔥 NO API KEY = SAFE MODE
+    // SAFE MODE
     if (!client) {
       return res.json({
-        reply: fallbackAI(history),
+        reply: fallback(history),
       });
     }
 
@@ -94,20 +96,18 @@ app.post("/api/chat", async (req, res) => {
     });
 
     res.json({
-      reply:
-        completion.choices?.[0]?.message?.content ||
-        "Bir şeyler sorabilir misin?",
+      reply: completion.choices?.[0]?.message?.content || "Tekrar dener misin?",
     });
-  } catch (err) {
-    console.error("API ERROR:", err);
 
-    res.status(500).json({
-      reply: "Server error oldu ama sistem ayakta.",
+  } catch (err) {
+    console.log("ERROR:", err);
+
+    res.status(200).json({
+      reply: "Sistem şu an fallback modda çalışıyor.",
     });
   }
 });
 
-// SPA fallback SAFE
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
 });
