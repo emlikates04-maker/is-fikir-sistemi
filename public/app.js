@@ -1,98 +1,46 @@
+let history = JSON.parse(localStorage.getItem("chat")) || [];
+
 const chat = document.getElementById("chat");
-const input = document.getElementById("input");
-const send = document.getElementById("send");
 
-let history = JSON.parse(localStorage.getItem("history")) || [];
+function render() {
+  chat.innerHTML = "";
 
-function saveHistory() {
-  localStorage.setItem("history", JSON.stringify(history));
-}
-
-function addMessage(role, text) {
-  const div = document.createElement("div");
-
-  div.classList.add("message");
-  div.classList.add(role);
-
-  div.innerText = text;
-
-  chat.appendChild(div);
+  history.forEach(m => {
+    const div = document.createElement("div");
+    div.className = "msg " + (m.role === "user" ? "user" : "ai");
+    div.innerText = m.content;
+    chat.appendChild(div);
+  });
 
   chat.scrollTop = chat.scrollHeight;
 }
 
-function loadMessages() {
-  history.forEach((msg) => {
-    addMessage(msg.role === "user" ? "user" : "ai", msg.content);
-  });
-}
+async function send() {
+  const input = document.getElementById("input");
+  const text = input.value;
+  if (!text) return;
 
-async function sendMessage() {
-  const message = input.value.trim();
+  history.push({ role: "user", content: text });
 
-  if (!message) return;
-
-  addMessage("user", message);
-
-  history.push({
-    role: "user",
-    content: message,
-  });
-
-  saveHistory();
-
+  render();
   input.value = "";
 
-  try {
-    const response = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message,
-        history,
-      }),
-    });
-
-    const data = await response.json();
-
-    addMessage("ai", data.reply);
-
-    history.push({
-      role: "assistant",
-      content: data.reply,
-    });
-
-    saveHistory();
-  } catch (err) {
-    addMessage(
-      "ai",
-      "Bağlantı problemi oluştu."
-    );
-  }
-}
-
-send.addEventListener("click", sendMessage);
-
-input.addEventListener("keypress", (e) => {
-  if (e.key === "Enter") {
-    sendMessage();
-  }
-});
-
-loadMessages();
-
-if (history.length === 0) {
-  const firstMessage =
-    "Şu an en çok ilgini çeken alan ne?";
-
-  addMessage("ai", firstMessage);
-
-  history.push({
-    role: "assistant",
-    content: firstMessage,
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: text,
+      history
+    })
   });
 
-  saveHistory();
+  const data = await res.json();
+
+  history.push({ role: "assistant", content: data.reply });
+
+  localStorage.setItem("chat", JSON.stringify(history));
+
+  render();
 }
+
+render();
