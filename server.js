@@ -2,130 +2,88 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const OpenAI = require("openai");
 const path = require("path");
 
-const app = express();
+const OpenAI = require("openai").default; // 🔥 KRİTİK FIX
 
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json({ limit: "1mb" }));
-
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-const client = process.env.OPENAI_API_KEY
-  ? new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    })
-  : null;
+// OPENAI SAFE INIT
+let client = null;
+
+if (process.env.OPENAI_API_KEY) {
+  client = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 const SYSTEM_PROMPT = `
 You are an AI SaaS discovery assistant.
 
-Your goal:
-- Analyze the user deeply
+Rules:
 - Ask ONE question at a time
-- Never instantly give startup ideas
-- Sound natural like ChatGPT
-- Short answers
-- No generic motivation
-- Discover:
-  - skills
-  - interests
-  - problems
-  - time availability
-  - income goals
-  - technical level
-
-Conversation strategy:
-- First 8+ messages are discovery mode
-- Ask follow-up questions
-- Understand user's psychology and behavior
-- Avoid long paragraphs
-
-Only after enough information generate:
-
-=== SAAS IDEA ===
-=== WHY IT FITS USER ===
-=== TARGET USERS ===
-=== MONETIZATION ===
-=== MVP PLAN ===
-=== TECH STACK ===
-=== FIRST ACTION ===
+- Do NOT give final SaaS idea early
+- Analyze user deeply
+- Be short and direct
+- Think like startup founder
 `;
 
-function fallbackAI(message, history = []) {
-  const totalMessages = history.length;
+function fallbackAI(history = []) {
+  const len = history.length;
 
-  if (totalMessages < 2) {
-    return "En çok vakit geçirdiğin alan ne? Teknoloji, içerik, finans, oyun, otomasyon vs?";
-  }
-
-  if (totalMessages < 4) {
-    return "Şu an internetten para kazanmayı denesen en rahat hangi skillini kullanırsın?";
-  }
-
-  if (totalMessages < 6) {
-    return "Günde gerçekçi şekilde kaç saat ayırabilirsin?";
-  }
-
-  if (totalMessages < 8) {
-    return "İnsanların yaşadığı hangi problem sana sürekli gözüne çarpıyor?";
-  }
+  if (len < 2) return "Ne yaparak para kazanmayı düşünüyorsun?";
+  if (len < 4) return "Teknik seviyen nedir? (0-10)";
+  if (len < 6) return "Günde kaç saat ayırabilirsin?";
+  if (len < 8) return "Hangi problem seni sinirlendiriyor?";
 
   return `
 === SAAS IDEA ===
-AI niche problem finder
+Micro AI automation tool
 
 === WHY IT FITS USER ===
-You like analyzing trends and online opportunities.
+You like problem solving
 
 === TARGET USERS ===
-Beginner founders
+Solo founders
 
 === MONETIZATION ===
-Monthly subscription
+Subscription
 
 === MVP PLAN ===
-- Landing page
-- AI chat
-- Problem database
+Simple AI chat + form
 
 === TECH STACK ===
 Node.js + OpenAI + Render
 
 === FIRST ACTION ===
-Build simple chat MVP
+Build MVP in 1 day
 `;
 }
 
 app.post("/api/chat", async (req, res) => {
   try {
-    const { message, history } = req.body;
+    const { message, history = [] } = req.body;
 
     if (!message) {
-      return res.status(400).json({
-        reply: "Message missing",
-      });
+      return res.json({ reply: "Mesaj boş olamaz" });
     }
 
+    // 🔥 NO API KEY = SAFE MODE
     if (!client) {
       return res.json({
-        reply: fallbackAI(message, history),
+        reply: fallbackAI(history),
       });
     }
 
     const messages = [
-      {
-        role: "system",
-        content: SYSTEM_PROMPT,
-      },
-      ...(history || []),
-      {
-        role: "user",
-        content: message,
-      },
+      { role: "system", content: SYSTEM_PROMPT },
+      ...history,
+      { role: "user", content: message },
     ];
 
     const completion = await client.chat.completions.create({
@@ -135,26 +93,25 @@ app.post("/api/chat", async (req, res) => {
       max_tokens: 300,
     });
 
-    const reply =
-      completion.choices?.[0]?.message?.content ||
-      "Biraz daha detay anlatır mısın?";
-
     res.json({
-      reply,
+      reply:
+        completion.choices?.[0]?.message?.content ||
+        "Bir şeyler sorabilir misin?",
     });
-  } catch (error) {
-    console.error(error);
+  } catch (err) {
+    console.error("API ERROR:", err);
 
     res.status(500).json({
-      reply: "Şu an kısa bir bağlantı problemi oldu. Devam et tekrar.",
+      reply: "Server error oldu ama sistem ayakta.",
     });
   }
 });
 
+// SPA fallback SAFE
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public/index.html"));
 });
 
 app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
+  console.log("Server running on", PORT);
 });
