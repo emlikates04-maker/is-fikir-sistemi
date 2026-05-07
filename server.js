@@ -1,13 +1,13 @@
-const express = require("express");
+import express from "express";
 
 const app = express();
 
 app.get("/", (req, res) => {
-  res.send("OK - SERVER IS LIVE");
+  res.send("OK");
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("LIVE ON", PORT);
+  console.log("Running on", PORT);
 });
